@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const SignUpForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -9,17 +10,50 @@ const SignUpForm: React.FC = () => {
     confirmPassword: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign up logic here
-    console.log('Sign up:', formData);
+    setError(null); // Clear previous error
+    setSuccessMessage(null); // Clear previous success message
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/signup`, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Assuming backend sends a success message
+      setSuccessMessage(response.data.message || 'Sign-up successful!');
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.error || 'An error occurred. Please try again.');
+      } else {
+        setError('An error occurred. Please check your network and try again.');
+      }
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -112,6 +146,9 @@ const SignUpForm: React.FC = () => {
           />
         </div>
       </div>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
 
       <div>
         <button

@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, setAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setAuthenticated(false); // Update context state
+    localStorage.removeItem('token'); // Remove token from localStorage
+    navigate('/'); // Redirect to homepage or login page
+  };
+  
 
   return (
-    <nav className="bg-gray-800 absolute w-full">
+    <nav className="bg-[#5C2E0D] absolute w-full">
       <div className="relative px-4 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <Link to="/" className="text-white text-xl font-semibold">
             Dermascope AI
           </Link>
           
-          {/* Mobile menu button */}
           <button
             className="md:hidden text-white hover:text-gray-400"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -24,7 +33,6 @@ const Navbar: React.FC = () => {
             </svg>
           </button>
 
-          {/* Desktop menu */}
           <div className="hidden md:flex space-x-4">
             <Link to="/" className="text-white hover:text-gray-400 transition-colors">
               Home
@@ -32,13 +40,21 @@ const Navbar: React.FC = () => {
             <Link to="/about" className="text-white hover:text-gray-400 transition-colors">
               About Us
             </Link>
-            <Link to="/auth" className="text-white hover:text-gray-400 transition-colors">
+            {isAuthenticated ? (
+              <button 
+                onClick={handleLogout}
+                className="text-white hover:text-gray-400 transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link to="/auth" className="text-white hover:text-gray-400 transition-colors">
                 Login/Register
-            </Link>            
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Mobile menu */}
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-700 mt-4 py-4">
             <div className="flex flex-col space-y-4 px-2">
@@ -48,9 +64,18 @@ const Navbar: React.FC = () => {
               <Link to="/about" className="text-white hover:text-gray-400 transition-colors">
                 About Us
               </Link>
-              <Link to="/auth" className="text-white hover:text-gray-400 transition-colors">
-                Login/Register
-              </Link>              
+              {isAuthenticated ? (
+                <button 
+                  onClick={handleLogout}
+                  className="text-white hover:text-gray-400 transition-colors text-left"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link to="/auth" className="text-white hover:text-gray-400 transition-colors">
+                  Login/Register
+                </Link>
+              )}
             </div>
           </div>
         )}
