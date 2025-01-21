@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, setAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/' && isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
 
   const handleLogout = () => {
-    setAuthenticated(false); // Update context state
-    localStorage.removeItem('token'); // Remove token from localStorage
-    navigate('/'); // Redirect to homepage or login page
+    setAuthenticated(false);
+    localStorage.removeItem('token');
+    navigate('/');
   };
-  
+
+  const homePath = isAuthenticated ? '/dashboard' : '/';
 
   return (
     <nav className="bg-[#5C2E0D] absolute w-full">
       <div className="relative px-4 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link to="/" className="text-white text-xl font-semibold">
+          <Link to={homePath} className="text-white text-xl font-semibold">
             Dermascope AI
           </Link>
           
@@ -34,8 +42,8 @@ const Navbar: React.FC = () => {
           </button>
 
           <div className="hidden md:flex space-x-4">
-            <Link to="/" className="text-white hover:text-gray-400 transition-colors">
-              Home
+            <Link to={homePath} className="text-white hover:text-gray-400 transition-colors">
+              {isAuthenticated ? 'Dashboard' : 'Home'}
             </Link>
             <Link to="/about" className="text-white hover:text-gray-400 transition-colors">
               About Us
@@ -58,8 +66,8 @@ const Navbar: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-700 mt-4 py-4">
             <div className="flex flex-col space-y-4 px-2">
-              <Link to="/" className="text-white hover:text-gray-400 transition-colors">
-                Home
+              <Link to={homePath} className="text-white hover:text-gray-400 transition-colors">
+                {isAuthenticated ? 'Dashboard' : 'Home'}
               </Link>
               <Link to="/about" className="text-white hover:text-gray-400 transition-colors">
                 About Us

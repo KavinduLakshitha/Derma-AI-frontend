@@ -9,11 +9,30 @@ type AuthContextType = {
   isAuthenticated: boolean;
   user: User | null;
   setAuthenticated: (value: boolean, token?: string, userData?: User) => void;
+  logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create the context with a default value matching the type
+const defaultContextValue: AuthContextType = {
+  isAuthenticated: false,
+  user: null,
+  setAuthenticated: () => {},
+  logout: () => {},
+};
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AuthContext = createContext<AuthContextType>(defaultContextValue);
+
+// Export the hook before the provider
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+// Changed to function declaration for better HMR compatibility
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('token') !== null;
   });
@@ -36,17 +55,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+    setUser(null);
+  };
+
+  const contextValue = {
+    isAuthenticated,
+    user,
+    setAuthenticated,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, setAuthenticated }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+}

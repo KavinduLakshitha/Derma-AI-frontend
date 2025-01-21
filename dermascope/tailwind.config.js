@@ -17,6 +17,15 @@ export default {
         poppins: ['Poppins', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
+      animation: {
+        'scan': 'scan 2s linear infinite',
+      },
+      keyframes: {
+        scan: {
+          '0%': { transform: 'translateY(-50%)' },
+          '100%': { transform: 'translateY(0%)' },
+        }
+      }
     },
   },
   plugins: [],
