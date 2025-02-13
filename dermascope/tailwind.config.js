@@ -6,15 +6,7 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        roboto: ['Roboto', 'sans-serif'],
-        lato: ['Lato', 'sans-serif'],
-        openSans: ['Open Sans', 'sans-serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
-        nunito: ['Nunito', 'sans-serif'],
-        sourceSansPro: ['Source Sans Pro', 'sans-serif'],
-        merriweather: ['Merriweather', 'serif'],
-        poppins: ['Poppins', 'sans-serif'],
+      fontFamily: {        
         inter: ['Inter', 'sans-serif'],
       },
       animation: {
@@ -25,6 +17,9 @@ export default {
           '0%': { transform: 'translateY(-50%)' },
           '100%': { transform: 'translateY(0%)' },
         }
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       }
     },
   },

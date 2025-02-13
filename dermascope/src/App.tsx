@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import AcneDetection from './pages/AcneDetection';
 import EczemaDetection from './pages/EczemaDetection';
 import PsoriasisDetection from './pages/PsoriasisDetection';
+import DoctorDashboard from './pages/DoctorDashboard';
+import PatientResults from './pages/PatientResults';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +21,9 @@ const App: React.FC = () => {
         <Route path="/acne-detection" element={<AcneDetection />} />
         <Route path="/eczema-detection" element={<EczemaDetection />} />
         <Route path="/psoriasis-detection" element={<PsoriasisDetection />} />
+
+        <Route path='/doctor-dashboard' element={<DoctorDashboard />} />
+        <Route path="/patient-results/:patientId" element={<PatientResults />} />
         {/* <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>

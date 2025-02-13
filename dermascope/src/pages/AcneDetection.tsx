@@ -32,20 +32,7 @@ const AcneDetectionApp = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
-
-  const getSeverityColor = (level: string) => {
-    switch (level) {
-      case 'Mild':
-        return 'text-yellow-600';
-      case 'Moderate':
-        return 'text-orange-600';
-      case 'Severe':
-        return 'text-red-600';
-      default:
-        return 'text-green-600';
-    }
-  };
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);  
 
   const getPredictionMessage = (
     predictedClass: string, 
@@ -181,7 +168,7 @@ const AcneDetectionApp = () => {
 
       {/* Main Section */}
       <main className="bg-[#F6E5D3] rounded-tl-3xl rounded-tr-3xl p-8">
-        <h2 className="text-center text-[#5C2E0D] text-lg font-medium mb-4">
+        <h2 className="text-center text-[#5C2E0D] text-lg font-medium mt-4 mb-4">
           Upload an image to detect and assess severity level
         </h2>
 

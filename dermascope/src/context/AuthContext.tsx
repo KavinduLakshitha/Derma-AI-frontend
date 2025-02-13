@@ -1,18 +1,25 @@
 import React, { createContext, useContext, useState } from 'react';
 
+type UserType = 'patient' | 'doctor';
+
 type User = {
   firstName: string;
-  userId: number;
+  userId?: number;
+  doctorId?: number;
+  userType?: UserType;
 };
 
 type AuthContextType = {
   isAuthenticated: boolean;
   user: User | null;
-  setAuthenticated: (value: boolean, token?: string, userData?: User) => void;
+  setAuthenticated: (
+    value: boolean,
+    token?: string,
+    userData?: User
+  ) => void;
   logout: () => void;
 };
 
-// Create the context with a default value matching the type
 const defaultContextValue: AuthContextType = {
   isAuthenticated: false,
   user: null,
@@ -22,7 +29,6 @@ const defaultContextValue: AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>(defaultContextValue);
 
-// Export the hook before the provider
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -31,7 +37,6 @@ export function useAuth() {
   return context;
 }
 
-// Changed to function declaration for better HMR compatibility
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('token') !== null;
@@ -46,8 +51,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(value);
     if (value && token && userData) {
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      localStorage.setItem('user', JSON.stringify({
+        firstName: userData.firstName,
+        userId: userData.userId,
+        doctorId: userData.doctorId,
+        userType: userData.userType
+      }));
+      setUser({
+        firstName: userData.firstName,
+        userId: userData.userId,
+        doctorId: userData.doctorId,
+        userType: userData.userType
+      });
     } else {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

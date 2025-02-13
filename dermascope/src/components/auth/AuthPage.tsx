@@ -9,6 +9,7 @@ interface AuthPageProps {}
 
 const AuthPage: React.FC<AuthPageProps> = () => {
   const [mode, setMode] = useState<AuthMode>('signin');
+  const [activeUserType, setActiveUserType] = useState<'patient' | 'doctor'>('patient');
 
   const getTitleText = (currentMode: AuthMode): string => {
     switch (currentMode) {
@@ -18,6 +19,13 @@ const AuthPage: React.FC<AuthPageProps> = () => {
         return 'Create your account';
       case 'forgot':
         return 'Reset your password';
+    }
+  };
+
+  const handleUserTypeChange = (userType: 'patient' | 'doctor') => {
+    setActiveUserType(userType);
+    if (userType === 'doctor') {
+      setMode('signin');
     }
   };
 
@@ -31,7 +39,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {mode === 'signin' && <SignInForm />}
+          {mode === 'signin' && <SignInForm onUserTypeChange={handleUserTypeChange} />}
           {mode === 'signup' && <SignUpForm />}
           {mode === 'forgot' && <ForgotPasswordForm />}
 
@@ -40,15 +48,23 @@ const AuthPage: React.FC<AuthPageProps> = () => {
               <div className="text-sm flex justify-between">
                 <button
                   type="button"
-                  onClick={() => setMode('forgot')}
-                  className="text-indigo-600 hover:text-indigo-500"
+                  onClick={() => activeUserType === 'patient' && setMode('forgot')}
+                  className={`text-[#5c2e0d] hover:text-[#4b2509] transition-opacity duration-200 ${
+                    activeUserType === 'doctor' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
+                  aria-hidden={activeUserType === 'doctor'}
+                  tabIndex={activeUserType === 'doctor' ? -1 : 0}
                 >
                   Forgot your password?
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMode('signup')}
-                  className="text-indigo-600 hover:text-indigo-500"
+                  onClick={() => activeUserType === 'patient' && setMode('signup')}
+                  className={`text-[#5c2e0d] hover:text-[#4b2509] transition-opacity duration-200 ${
+                    activeUserType === 'doctor' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
+                  aria-hidden={activeUserType === 'doctor'}
+                  tabIndex={activeUserType === 'doctor' ? -1 : 0}
                 >
                   Create new account
                 </button>
@@ -57,7 +73,7 @@ const AuthPage: React.FC<AuthPageProps> = () => {
               <button
                 type="button"
                 onClick={() => setMode('signin')}
-                className="text-sm text-indigo-600 hover:text-indigo-500"
+                className="text-sm text-[#5c2e0d] hover:text-[#4b2509]"
               >
                 Back to sign in
               </button>
