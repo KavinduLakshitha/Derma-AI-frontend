@@ -5,7 +5,10 @@ import ForgotPasswordForm from './ForgotPassword';
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
 
-interface AuthPageProps {}
+interface AuthPageProps {
+  initialMode?: AuthMode;
+  onModeChange?: (mode: AuthMode) => void;
+}
 
 const AuthPage: React.FC<AuthPageProps> = () => {
   const [mode, setMode] = useState<AuthMode>('signin');

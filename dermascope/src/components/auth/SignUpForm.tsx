@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const SignUpForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -40,9 +40,10 @@ const SignUpForm: React.FC = () => {
         password: '',
         confirmPassword: '',
       });
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        setError(error.response.data.error || 'An error occurred. Please try again.');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ error: string }>;
+      if (axiosError.response && axiosError.response.data) {
+        setError(axiosError.response.data.error || 'An error occurred. Please try again.');
       } else {
         setError('An error occurred. Please check your network and try again.');
       }

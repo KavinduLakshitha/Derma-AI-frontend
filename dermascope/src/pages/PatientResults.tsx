@@ -13,8 +13,14 @@ interface TestResult {
   id: number;
   testType: string;
   imageUrl: string;
-  testResults: string | { prediction: string };
+  testResults: {
+    prediction: string;
+    confidence: number;
+    detailed_scores?: number[];
+    body_part: string;
+  };
   createdAt: string;
+  bodyPart: string;
 }
 
 interface Patient {
@@ -34,29 +40,18 @@ const PatientResults = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const calculateSeverity = (prediction: string): number => {
-    return prediction.toLowerCase() === 'acne' ? 75 : 25;
-  };
 
   const getChartData = (): ChartData[] => {
-    return testResults.map(result => ({
-      date: new Date(result.createdAt).toLocaleDateString(),
-      severity: calculateSeverity(getPrediction(result.testResults))
-    }));
-  };
+    return [...testResults]
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .map(result => ({
+        date: new Date(result.createdAt).toLocaleDateString(),
+        severity: calculateSeverity(result.testResults)
+      }));
+  };  
 
-  const getPrediction = (testResults: string | { prediction: string }): string => {
-    try {
-      if (typeof testResults === 'string') {
-        const parsed = JSON.parse(testResults);
-        return parsed.prediction || 'No prediction available';
-      }
-      return testResults.prediction || 'No prediction available';
-    } catch (error) {
-      console.error('Error parsing test results:', error);
-      return 'Error parsing results';
-    }
+  const calculateSeverity = (testResults: TestResult['testResults']): number => {
+    return testResults.confidence || 0;
   };
 
   useEffect(() => {
@@ -89,17 +84,12 @@ const PatientResults = () => {
               {new Date(result.createdAt).toLocaleDateString()}
             </span>
           </div>
-          {getPrediction(result.testResults).toLowerCase() === 'acne' ? (
-            <div className="flex items-center gap-1 text-red-500">
-              <TrendingUp size={16} />
-              <span className="text-sm font-medium">High Severity</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 text-green-500">
-              <TrendingDown size={16} />
-              <span className="text-sm font-medium">Low Severity</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1 text-gray-600">
+            <Activity size={16} />
+            <span className="text-sm font-medium">
+              Confidence: {result.testResults.confidence}%
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Image
@@ -115,13 +105,17 @@ const PatientResults = () => {
             </p>
             <p className="flex items-center gap-2 text-sm">
               <Activity size={14} className="text-indigo-600" />
-              Results: 
+              Body Part: {result.bodyPart}
+            </p>
+            <p className="flex items-center gap-2 text-sm">
+              <Activity size={14} className="text-indigo-600" />
+              Result: 
               <span className={`font-semibold ${
-                getPrediction(result.testResults).toLowerCase() === 'acne' 
+                result.testResults.prediction === 'Acne' 
                   ? 'text-red-500' 
                   : 'text-green-500'
               }`}>
-                {getPrediction(result.testResults)}
+                {result.testResults.prediction}
               </span>
             </p>
           </div>
@@ -138,7 +132,7 @@ const PatientResults = () => {
     <div className="p-4 bg-[#f8f0ed]">
       <Spin spinning={loading}>
         {patientData && (
-          <div className="space-y-4 mt-11">
+          <div className="space-y-4 mt-20">
             <Card
               title={
                 <div className="flex items-center gap-3 text-xl font-bold text-gray-800">

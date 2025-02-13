@@ -68,7 +68,7 @@ const DoctorDashboard = () => {
 
   return (
     <div className="p-6 min-h-screen bg-[#f8f0ed]">
-      <div className="font-semibold  mt-10">
+      <div className="font-semibold mt-16">
         <p className="mb-4 pt-4">You have access to {patients.length} patient records</p>
         
         <Spin spinning={loading}>
