@@ -48,7 +48,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
             doctorId: data.doctorId,
             userType: 'doctor'
           });
-          navigate('/dashboard');
+          navigate('/doctor-dashboard');
         } else {
           setAuthenticated(true, token, {
             firstName: data.firstName,

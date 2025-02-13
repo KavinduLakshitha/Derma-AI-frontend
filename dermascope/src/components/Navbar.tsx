@@ -22,11 +22,12 @@ const Navbar: React.FC = () => {
     setShowLogoutConfirm(false);
   };
 
-  const homePath = isAuthenticated ? '/dashboard' : '/';
+  const homePath = isAuthenticated ? (user?.userType === 'doctor' ? '/doctor-dashboard' : '/dashboard'): '/';
+
+  const showDashboardLink = isAuthenticated && user?.userType !== 'doctor';
 
   return (
     <nav className="bg-[#fcecdc] shadow-lg fixed w-full z-50">
-      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl max-w-md w-full mx-4">
@@ -58,9 +59,6 @@ const Navbar: React.FC = () => {
               alt="Dermascope AI Logo" 
               className="h-24 object-contain" 
             />
-            {/* <span className="text-white text-xl font-semibold font-montserrat">
-              Dermascope AI
-            </span> */}
           </Link>
           
           <button
@@ -75,12 +73,22 @@ const Navbar: React.FC = () => {
           </button>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to={homePath} 
-              className="text-[#5c2e0d] hover:text-[#ffab7b] transition-colors px-3 py-2 rounded-lg"
-            >
-              {isAuthenticated ? 'Dashboard' : 'Home'}
-            </Link>
+          {!isAuthenticated && (
+              <Link 
+                to="/" 
+                className="text-[#5c2e0d] hover:text-[#ffab7b] transition-colors px-3 py-2 rounded-lg"
+              >
+                Home
+              </Link>
+            )}
+            {showDashboardLink && (
+              <Link 
+                to="/dashboard" 
+                className="text-[#5c2e0d] hover:text-[#ffab7b] transition-colors px-3 py-2 rounded-lg"
+              >
+                Dashboard
+              </Link>
+            )}
             
             {isAuthenticated && user?.userType === 'doctor' && (
               <Link 

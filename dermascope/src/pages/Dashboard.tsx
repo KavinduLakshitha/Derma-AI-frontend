@@ -18,9 +18,11 @@ const Dashboard = () => {
   const getGreeting = () => {
     const hours = new Date().getHours();
     if (hours < 12) return 'Good morning';
-    if (hours < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hours < 15) return 'Good afternoon';
+    if (hours < 18) return 'Good evening';
+    return 'Good night';
   };
+  
 
   const getNameWithTitle = () => {
     const name = user?.firstName || 'Guest';
