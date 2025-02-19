@@ -19,14 +19,17 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
   const handleTabChange = (userType: 'patient' | 'doctor') => {
     setActiveTab(userType);
     onUserTypeChange(userType);
+    // Clear form data and errors when switching tabs
+    setFormData({ email: '', password: '' });
+    setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent, userType: 'patient' | 'doctor') => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
   
     try {
-      const endpoint = userType === 'doctor' 
+      const endpoint = activeTab === 'doctor' 
         ? 'http://localhost:5000/api/doctor/signin' 
         : 'http://localhost:5000/api/signin';
   
@@ -42,7 +45,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
         const data = await response.json();
         const token = `token-${Date.now()}`;
         
-        if (userType === 'doctor') {
+        if (activeTab === 'doctor') {
           setAuthenticated(true, token, {
             firstName: data.firstName,
             doctorId: data.doctorId,
@@ -75,16 +78,51 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
     }));
   };
 
-  const SignInPanel = ({ userType }: { userType: 'patient' | 'doctor' }) => (
-    <div>
-      <form className="space-y-6" onSubmit={(e) => handleSubmit(e, userType)}>
+  return (
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Welcome Back to{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5c2e0d] to-[#ff6b6b]">
+            Dermascope AI
+          </span>
+        </h1>
+        <p className="text-gray-700">Please sign in to access your account</p>
+      </div>
+
+      <div className="flex mb-8 rounded-xl bg-gray-100 p-1">
+        <button
+          type="button"
+          onClick={() => handleTabChange('patient')}
+          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'patient'
+              ? 'bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white shadow-md'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          Patient Login
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange('doctor')}
+          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'doctor'
+              ? 'bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white shadow-md'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          Doctor Login
+        </button>
+      </div>
+
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor={`${userType}-email`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email address
           </label>
           <div className="mt-1">
             <input
-              id={`${userType}-email`}
+              id="email"
               name="email"
               type="email"
               required
@@ -96,12 +134,12 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
         </div>
 
         <div>
-          <label htmlFor={`${userType}-password`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Password
           </label>
           <div className="mt-1">
             <input
-              id={`${userType}-password`}
+              id="password"
               name="password"
               type="password"
               required
@@ -119,49 +157,10 @@ const SignInForm: React.FC<SignInFormProps> = ({ onUserTypeChange }) => {
             type="submit"
             className="w-full py-3 px-6 bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 shadow-md hover:shadow-[#5c2e0d]/30"
           >
-            Sign in as {userType.charAt(0).toUpperCase() + userType.slice(1)}
+            Sign in as {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
           </button>
         </div>
       </form>
-    </div>
-  );
-
-  return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome Back to{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5c2e0d] to-[#ff6b6b]">
-            Dermascope AI
-          </span>
-        </h1>
-        <p className="text-gray-700">Please sign in to access your account</p>
-      </div>
-
-      <div className="flex mb-8 rounded-xl bg-gray-100 p-1">
-        <button
-          onClick={() => handleTabChange('patient')}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === 'patient'
-              ? 'bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white shadow-md'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          Patient Login
-        </button>
-        <button
-          onClick={() => handleTabChange('doctor')}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === 'doctor'
-              ? 'bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white shadow-md'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          Doctor Login
-        </button>
-      </div>
-
-      {activeTab === 'patient' ? <SignInPanel userType="patient" /> : <SignInPanel userType="doctor" />}
     </div>
   );
 };

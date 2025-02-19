@@ -154,7 +154,7 @@ const SignUpForm: React.FC = () => {
       <div>
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="w-full py-3 px-6 bg-gradient-to-r from-[#5c2e0d] to-[#cc5b2a] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 shadow-md hover:shadow-[#5c2e0d]/30"
         >
           Sign up
         </button>
