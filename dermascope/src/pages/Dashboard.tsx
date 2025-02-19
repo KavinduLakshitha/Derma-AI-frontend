@@ -20,7 +20,7 @@ const Dashboard = () => {
     if (hours < 12) return 'Good morning';
     if (hours < 15) return 'Good afternoon';
     if (hours < 18) return 'Good evening';
-    return 'Good night';
+    return 'Good evening';
   };
   
 

@@ -3,8 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, Spin, Timeline, Image } from 'antd';
 import { 
   ArrowLeft, Mail, FileText, 
-  Calendar, Activity, User,
-  TrendingDown, TrendingUp
+  Calendar, Activity, User
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { TimelineItemProps } from 'antd/es/timeline';
@@ -14,10 +13,15 @@ interface TestResult {
   testType: string;
   imageUrl: string;
   testResults: {
-    prediction: string;
+    detected?: boolean;
     confidence: number;
-    detailed_scores?: number[];
-    body_part: string;
+    raw_predictions?: number[];
+    severity?: {
+      level: string;
+      confidence: number;
+    };
+    severity_scores?: Record<string, number>;
+    body_part?: string;
   };
   createdAt: string;
   bodyPart: string;
@@ -31,8 +35,17 @@ interface Patient {
 
 interface ChartData {
   date: string;
-  severity: number;
+  severityValue: number;
+  severityLabel: string;
 }
+
+// Severity level mapping
+const SEVERITY_LEVELS = ["Clear", "Mild", "Moderate", "Severe"];
+const getSeverityValue = (level: string): number => {
+  return SEVERITY_LEVELS.indexOf(level) !== -1 ? 
+    SEVERITY_LEVELS.indexOf(level) : 
+    (level === "No Acne" || level === "No Eczema" || level === "No Psoriasis") ? 0 : 1;
+};
 
 const PatientResults = () => {
   const { patientId } = useParams();
@@ -44,14 +57,15 @@ const PatientResults = () => {
   const getChartData = (): ChartData[] => {
     return [...testResults]
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      .map(result => ({
-        date: new Date(result.createdAt).toLocaleDateString(),
-        severity: calculateSeverity(result.testResults)
-      }));
-  };  
-
-  const calculateSeverity = (testResults: TestResult['testResults']): number => {
-    return testResults.confidence || 0;
+      .map(result => {
+        const severityLevel = result.testResults.severity?.level || 
+                             (result.testResults.detected ? `Mild` : `Clear`);
+        return {
+          date: new Date(result.createdAt).toLocaleDateString(),
+          severityValue: getSeverityValue(severityLevel),
+          severityLabel: severityLevel
+        };
+      });
   };
 
   useEffect(() => {
@@ -73,6 +87,26 @@ const PatientResults = () => {
     };
     fetchData();
   }, [patientId]);
+
+  // Helper function to determine the result text
+  const getResultText = (result: TestResult): string => {
+    const { testType, testResults } = result;
+    
+    // If severity assessment was performed
+    if (testResults.severity?.level) {
+      return `${testType.charAt(0).toUpperCase() + testType.slice(1)} - ${testResults.severity.level}`;
+    }
+    
+    // If only detection was performed
+    if (testResults.detected !== undefined) {
+      return testResults.detected 
+        ? `${testType.charAt(0).toUpperCase() + testType.slice(1)} Detected` 
+        : `No ${testType.charAt(0).toUpperCase() + testType.slice(1)} Detected`;
+    }
+    
+    // Fallback
+    return "Results Pending";
+  };
 
   const items: TimelineItemProps[] = testResults.map(result => ({
     children: (
@@ -111,13 +145,24 @@ const PatientResults = () => {
               <Activity size={14} className="text-indigo-600" />
               Result: 
               <span className={`font-semibold ${
-                result.testResults.prediction === 'Acne' 
-                  ? 'text-red-500' 
-                  : 'text-green-500'
+                result.testResults.detected ? 'text-amber-500' : 'text-green-500'
               }`}>
-                {result.testResults.prediction}
+                {getResultText(result)}
               </span>
             </p>
+            {result.testResults.severity && (
+              <p className="flex items-center gap-2 text-sm">
+                <Activity size={14} className="text-orange-600" />
+                Severity: 
+                <span className={`font-semibold ${
+                  result.testResults.severity.level === 'Severe' ? 'text-red-600' :
+                  result.testResults.severity.level === 'Moderate' ? 'text-orange-500' :
+                  result.testResults.severity.level === 'Mild' ? 'text-yellow-500' : 'text-green-500'
+                }`}>
+                  {result.testResults.severity.level}
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -127,6 +172,32 @@ const PatientResults = () => {
   if (error) {
     return <div className="p-4 text-red-600 text-lg font-medium">{error}</div>;
   }
+
+  const customYAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const value = payload.value;
+    const severityLabel = SEVERITY_LEVELS[value] || "Unknown";
+    
+    return (
+      <text x={x} y={y} dy={4} fontSize={12} textAnchor="end" fill="#666">
+        {severityLabel}
+      </text>
+    );
+  };
+
+  const customTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
+          <p className="text-sm font-medium">{`Date: ${label}`}</p>
+          <p className="text-sm font-medium text-indigo-600">
+            {`Severity: ${payload[0].payload.severityLabel}`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="p-4 bg-[#f8f0ed]">
@@ -175,19 +246,15 @@ const PatientResults = () => {
                         interval="preserveStartEnd"
                       />
                       <YAxis 
-                        domain={[0, 100]} 
-                        tick={{ fontSize: 12 }}
-                        label={{ 
-                          value: 'Severity Score', 
-                          angle: -90, 
-                          position: 'insideLeft',
-                          fontSize: 12 
-                        }}
+                        dataKey="severityValue"
+                        domain={[0, 3]}
+                        ticks={[0, 1, 2, 3]}
+                        tick={customYAxisTick}
                       />
-                      <Tooltip />
+                      <Tooltip content={customTooltip} />
                       <Line 
                         type="monotone" 
-                        dataKey="severity" 
+                        dataKey="severityValue" 
                         stroke="#6366f1"
                         strokeWidth={2}
                         dot={{ fill: '#6366f1' }}
