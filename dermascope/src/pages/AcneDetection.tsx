@@ -86,12 +86,11 @@ const AcneDetectionApp = () => {
       }
   
       const result: DetectionResponse = await response.json();
-      console.log("Detection result:", result); // Debug log
   
       setPrediction(prev => ({
         ...prev,
         detection: {
-          isDetected: result.detected,  // Make sure this matches backend response
+          isDetected: result.detected,
           confidence: result.confidence,
           resultId: result.resultId
         }

@@ -59,7 +59,7 @@ const DoctorDashboard = () => {
     {
       title: 'Action',
       render: (_, record) => (
-        <Link to={`/patient-results/${record.id}`} className="text-indigo-600 hover:text-indigo-900">
+        <Link to={`/patient-results/${record.id}`} className="text-[#8B4513] hover:text-[#A0522D]">
           View History
         </Link>
       ),
